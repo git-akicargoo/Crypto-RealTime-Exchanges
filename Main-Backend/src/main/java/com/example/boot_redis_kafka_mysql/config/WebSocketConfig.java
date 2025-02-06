@@ -2,13 +2,20 @@ package com.example.boot_redis_kafka_mysql.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.web.socket.client.standard.StandardWebSocketClient;
+import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.socket.client.ReactorNettyWebSocketClient;
+import org.springframework.web.reactive.socket.client.WebSocketClient;
 
 @Configuration
 public class WebSocketConfig {
     
     @Bean
-    public StandardWebSocketClient standardWebSocketClient() {
-        return new StandardWebSocketClient();
+    public WebSocketClient webSocketClient() {
+        return new ReactorNettyWebSocketClient();
+    }
+
+    @Bean
+    public WebClient webClient() {
+        return WebClient.builder().build();
     }
 } 

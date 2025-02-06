@@ -1,56 +1,67 @@
 package com.example.boot_redis_kafka_mysql.exchange.handler.impl;
 
-import jakarta.annotation.PostConstruct;
-import org.springframework.stereotype.Component;
-import org.springframework.web.socket.BinaryMessage;
-import org.springframework.web.socket.WebSocketSession;
-import org.springframework.web.socket.handler.AbstractWebSocketHandler;
-import com.example.boot_redis_kafka_mysql.exchange.handler.UpbitWebSocketHandler;
-import com.example.boot_redis_kafka_mysql.exchange.connection.WebSocketManager;
-import com.example.boot_redis_kafka_mysql.exchange.config.ExchangeConfig.Exchange;
-import com.example.boot_redis_kafka_mysql.exchange.model.vo.MarketSubscribeVO;
-import lombok.RequiredArgsConstructor;
+import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import java.util.List;
-import java.nio.charset.StandardCharsets;
+import org.springframework.stereotype.Component;
+import org.springframework.web.reactive.socket.WebSocketHandler;
+import org.springframework.web.reactive.socket.WebSocketMessage;
+import org.springframework.web.reactive.socket.WebSocketSession;
+
+import com.example.boot_redis_kafka_mysql.exchange.config.ExchangeConfig.Exchange;
+import com.example.boot_redis_kafka_mysql.exchange.connection.WebSocketManager;
+import com.example.boot_redis_kafka_mysql.exchange.handler.UpbitWebSocketHandler;
+import com.example.boot_redis_kafka_mysql.exchange.model.vo.MarketSubscribeVO;
+
+import lombok.RequiredArgsConstructor;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+import reactor.core.publisher.Sinks;
 
 @Component
 @RequiredArgsConstructor
-public class UpbitWebSocketHandlerImpl extends AbstractWebSocketHandler implements UpbitWebSocketHandler {
+public class UpbitWebSocketHandlerImpl implements WebSocketHandler, UpbitWebSocketHandler {
     private static final Logger log = LoggerFactory.getLogger(UpbitWebSocketHandlerImpl.class);
     
     private final WebSocketManager webSocketManager;
-    private WebSocketSession session;
+    private final Sinks.Many<String> marketDataSink = Sinks.many().multicast().onBackpressureBuffer();
 
-    @PostConstruct
-    public void init() {
-        this.session = webSocketManager.createSession(Exchange.UPBIT, this);
+    @Override
+    public Mono<Void> connect() {
+        return webSocketManager.createConnection(Exchange.UPBIT, this)
+            .doOnSuccess(v -> log.info("Upbit WebSocket 연결 성공"))
+            .doOnError(e -> log.error("Upbit WebSocket 연결 실패", e));
     }
 
     @Override
-    public void subscribeToTicker(List<String> symbols, List<String> currencies) throws Exception {
-        if (session != null && session.isOpen()) {
-            MarketSubscribeVO subscribeVO = MarketSubscribeVO.builder()
-                .exchange(Exchange.UPBIT)
-                .symbols(symbols)
-                .currencies(currencies)
-                .build();
-                
-            String message = subscribeVO.createSubscribeMessage();
-            session.sendMessage(new BinaryMessage(message.getBytes(StandardCharsets.UTF_8)));
-            log.info("Upbit 구독 메시지 전송: {}", message);
-        }
+    public Mono<Void> handle(WebSocketSession session) {
+        return session.receive()
+            .map(WebSocketMessage::getPayloadAsText)
+            .doOnNext(this::handleMessage)
+            .then();
     }
 
     @Override
-    public void handleMessage(String payload) {
-        log.debug("Upbit 메시지 수신: {}", payload);
+    public Mono<Void> subscribeToTicker(List<String> symbols, List<String> currencies) {
+        MarketSubscribeVO subscribeVO = MarketSubscribeVO.builder()
+            .exchange(Exchange.UPBIT)
+            .symbols(symbols)
+            .currencies(currencies)
+            .build();
+            
+        String message = subscribeVO.createSubscribeMessage();
+        return webSocketManager.sendMessage(Exchange.UPBIT, message)
+            .doOnSuccess(v -> log.info("Upbit 구독 성공: symbols={}, currencies={}", symbols, currencies))
+            .doOnError(e -> log.error("Upbit 구독 실패", e));
     }
 
     @Override
-    protected void handleBinaryMessage(WebSocketSession session, BinaryMessage message) {
-        String payload = new String(message.getPayload().array(), StandardCharsets.UTF_8);
-        handleMessage(payload);
+    public Flux<String> getMarketDataStream() {
+        return marketDataSink.asFlux();
+    }
+
+    private void handleMessage(String message) {
+        marketDataSink.tryEmitNext(message);
     }
 }

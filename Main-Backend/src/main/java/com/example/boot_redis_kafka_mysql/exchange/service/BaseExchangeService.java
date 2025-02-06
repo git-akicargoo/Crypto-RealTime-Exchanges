@@ -1,8 +1,12 @@
 package com.example.boot_redis_kafka_mysql.exchange.service;
 
+import reactor.core.publisher.Mono;
+import reactor.core.publisher.Flux;
 import java.util.List;
+import com.example.boot_redis_kafka_mysql.exchange.model.dto.MarketPriceDTO;
 
 public interface BaseExchangeService {
-    void processMarketData(String payload);  // 모든 거래소가 market data를 처리
-    void subscribeToSymbols(List<String> symbols, List<String> currencies);  // currencies 파라미터 추가
+    Mono<Void> subscribeToSymbols(List<String> symbols, List<String> currencies);
+    Flux<MarketPriceDTO> getMarketDataStream();
+    MarketPriceDTO parseMarketData(String rawData);
 } 

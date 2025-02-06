@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>
+                %d{HH:mm:ss.SSS} [%-5level] [%thread] - %msg%n
+            </pattern>
+        </encoder>
+    </appender>
+
+    <!-- 테스트 클래스의 로그 레벨을 DEBUG로 설정 -->
+    <logger name="com.example.boot_redis_kafka_mysql.exchange.service.ExchangeServiceTest" level="DEBUG">
+        <appender-ref ref="CONSOLE" />
+    </logger>
+
+    <!-- WebSocket 관련 로그 레벨 설정 -->
+    <logger name="com.example.boot_redis_kafka_mysql.exchange.connection" level="DEBUG">
+        <appender-ref ref="CONSOLE" />
+    </logger>
+
+    <logger name="com.example.boot_redis_kafka_mysql.exchange.handler" level="DEBUG">
+        <appender-ref ref="CONSOLE" />
+    </logger>
+
+    <root level="INFO">
+        <appender-ref ref="CONSOLE" />
+    </root>
+</configuration> 

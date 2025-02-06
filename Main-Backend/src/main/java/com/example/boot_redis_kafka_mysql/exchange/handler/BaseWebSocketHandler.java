@@ -1,8 +1,10 @@
 package com.example.boot_redis_kafka_mysql.exchange.handler;
 
+import reactor.core.publisher.Mono;
+import reactor.core.publisher.Flux;
 import java.util.List;
 
 public interface BaseWebSocketHandler {
-    void subscribeToTicker(List<String> symbols, List<String> currencies) throws Exception;
-    void handleMessage(String payload);
+    Mono<Void> subscribeToTicker(List<String> symbols, List<String> currencies);
+    Flux<String> getMarketDataStream();
 } 

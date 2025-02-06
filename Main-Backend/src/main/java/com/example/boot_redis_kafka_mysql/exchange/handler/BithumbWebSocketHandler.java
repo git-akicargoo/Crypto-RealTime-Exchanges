@@ -1,5 +1,12 @@
 package com.example.boot_redis_kafka_mysql.exchange.handler;
 
-public interface BithumbWebSocketHandler extends BaseWebSocketHandler {
-    // Bithumb 특화 기능이 필요하다면 여기에 추가
+import java.util.List;
+
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+
+public interface BithumbWebSocketHandler {
+    Mono<Void> connect();
+    Mono<Void> subscribeToTicker(List<String> symbols, List<String> currencies);
+    Flux<String> getMarketDataStream();
 } 

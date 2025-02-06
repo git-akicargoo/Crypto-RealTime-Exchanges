@@ -1,7 +1,7 @@
 package com.example.boot_redis_kafka_mysql.exchange.service;
 
-import java.util.List;
+import reactor.core.publisher.Flux;
 
 public interface UpbitExchangeService extends BaseExchangeService {
-    List<String> getAllMarkets();  // Upbit만의 특화 기능
+    Flux<String> getAllMarkets();  // List<String>에서 Flux<String>으로 변경
 } 
