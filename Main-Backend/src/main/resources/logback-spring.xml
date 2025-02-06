@@ -17,8 +17,13 @@
     </appender>
 
     <!-- 거래소 데이터 전용 로거 -->
-    <logger name="com.example.boot_redis_kafka_mysql.exchange.connection" level="INFO" additivity="false">
+    <logger name="com.example.boot_redis_kafka_mysql.exchange.observer" level="INFO" additivity="false">
         <appender-ref ref="EXCHANGE_DATA" />
+    </logger>
+
+    <!-- 거래소 연결 상태 로거 -->
+    <logger name="com.example.boot_redis_kafka_mysql.exchange.connection" level="INFO" additivity="false">
+        <appender-ref ref="CONSOLE" />
     </logger>
 
     <!-- 루트 로거 설정 -->

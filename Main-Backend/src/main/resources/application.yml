@@ -1,0 +1,29 @@
+spring:
+  application:
+    name: crypto-exchange-monitor
+  jpa:
+    hibernate:
+      ddl-auto: create
+    show-sql: true
+  datasource:
+    url: jdbc:h2:mem:testdb
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+
+logging:
+  level:
+    root: INFO
+    com.example.boot_redis_kafka_mysql: INFO
+    com.example.boot_redis_kafka_mysql.exchange.observer: INFO
+    com.example.boot_redis_kafka_mysql.exchange.handler: INFO
+    com.example.boot_redis_kafka_mysql.exchange.handler.exchange.BinanceWebSocketHandler: WARN
+    com.example.boot_redis_kafka_mysql.exchange: DEBUG
+
+exchange:
+  enabled: true
+  log:
+    enabled: true
+  target-symbols:
+    - BTC
+    - DOGE
