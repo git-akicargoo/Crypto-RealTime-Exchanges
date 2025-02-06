@@ -2,6 +2,7 @@ package com.example.boot_redis_kafka_mysql.exchange.service.impl;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -29,6 +30,7 @@ public class BinanceExchangeServiceImpl implements BinanceExchangeService {
     private final BinanceWebSocketHandler handler;
     private final ObjectMapper objectMapper;
     private Flux<String> sharedMarketDataStream;
+    private static final List<String> QUOTE_CURRENCIES = Arrays.asList("USDT", "BUSD", "USDC", "BTC", "ETH");
 
     @Override
     public Mono<Void> subscribeToSymbols(List<String> symbols, List<String> currencies) {
@@ -87,12 +89,26 @@ public class BinanceExchangeServiceImpl implements BinanceExchangeService {
                 return null;
             }
 
-            // bookTicker 메시지 파싱
+            String marketSymbol = node.get("s").asText();  // e.g., "BTCUSDT" or "ETHBTC"
+            
+            // 지원하는 quote currency 찾기
+            String currency = QUOTE_CURRENCIES.stream()
+                .filter(marketSymbol::endsWith)
+                .findFirst()
+                .orElse(null);
+
+            if (currency == null) {
+                log.warn("Unsupported Binance quote currency in symbol: {}", marketSymbol);
+                return null;
+            }
+
+            String symbol = marketSymbol.substring(0, marketSymbol.length() - currency.length());
+
             return MarketPriceDTO.builder()
                 .exchange(Exchange.BINANCE)
-                .symbol(node.get("s").asText().replace("USDT", ""))
-                .currency("USDT")
-                .price(new BigDecimal(node.get("a").asText()))  // 매도 호가 사용
+                .symbol(symbol)
+                .currency(currency)
+                .price(new BigDecimal(node.get("c").asText()))
                 .timestamp(Instant.now())
                 .build();
         } catch (Exception e) {

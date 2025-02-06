@@ -59,34 +59,30 @@ public class BithumbExchangeServiceImpl implements BithumbExchangeService {
         try {
             JsonNode node = objectMapper.readTree(message);
             
-            // 연결 성공 메시지나 에러 응답은 조용히 null 반환
             if (node.has("status") || !node.has("type") || !"ticker".equals(node.get("type").asText())) {
                 return null;
             }
 
             JsonNode content = node.get("content");
-            String symbol = content.get("symbol").asText().replace("_KRW", "");
-            String price = content.get("closePrice").asText();
-            String volume = content.get("volume").asText();
-            String highPrice = content.get("highPrice").asText();
-            String lowPrice = content.get("lowPrice").asText();
-            String openPrice = content.get("openPrice").asText();
-            String changeRate = content.get("chgRate").asText();
+            String marketSymbol = content.get("symbol").asText();  // "BTC_KRW"
+            String[] parts = marketSymbol.split("_");  // ["BTC", "KRW"]
+            String symbol = parts[0];  // "BTC"
+            String currency = parts[1];  // "KRW"
 
             return MarketPriceDTO.builder()
                 .exchange(Exchange.BITHUMB)
                 .symbol(symbol)
-                .currency("KRW")
-                .price(new BigDecimal(price))
-                .volume(new BigDecimal(volume))
+                .currency(currency)
+                .price(new BigDecimal(content.get("closePrice").asText()))
+                .volume(new BigDecimal(content.get("volume").asText()))
                 .timestamp(Instant.now())
-                .highPrice(new BigDecimal(highPrice))
-                .lowPrice(new BigDecimal(lowPrice))
-                .openPrice(new BigDecimal(openPrice))
-                .changeRate(new BigDecimal(changeRate).divide(BigDecimal.valueOf(100)))
+                .highPrice(new BigDecimal(content.get("highPrice").asText()))
+                .lowPrice(new BigDecimal(content.get("lowPrice").asText()))
+                .openPrice(new BigDecimal(content.get("openPrice").asText()))
+                .changeRate(new BigDecimal(content.get("chgRate").asText()).divide(BigDecimal.valueOf(100)))
                 .build();
         } catch (Exception e) {
-            log.debug("Skipping Bithumb message: {}", message);  // error -> debug로 변경
+            log.debug("Skipping Bithumb message: {}", message);
             return null;
         }
     }

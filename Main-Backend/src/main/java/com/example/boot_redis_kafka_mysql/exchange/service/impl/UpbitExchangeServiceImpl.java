@@ -61,33 +61,29 @@ public class UpbitExchangeServiceImpl implements UpbitExchangeService {
         try {
             JsonNode node = objectMapper.readTree(message);
             
-            // 구독 응답이나 에러 응답은 조용히 null 반환
             if (!node.has("type") || !"ticker".equals(node.get("type").asText())) {
                 return null;
             }
 
-            String symbol = node.get("code").asText().replace("KRW-", "");
-            String price = node.get("trade_price").asText();
-            String volume = node.get("acc_trade_volume_24h").asText();
-            String highPrice = node.get("high_price").asText();
-            String lowPrice = node.get("low_price").asText();
-            String openPrice = node.get("opening_price").asText();
-            String changeRate = node.get("signed_change_rate").asText();
+            String marketCode = node.get("code").asText();  // "KRW-BTC"
+            String[] parts = marketCode.split("-");  // ["KRW", "BTC"]
+            String currency = parts[0];  // "KRW"
+            String symbol = parts[1];    // "BTC"
 
             return MarketPriceDTO.builder()
                 .exchange(Exchange.UPBIT)
                 .symbol(symbol)
-                .currency("KRW")
-                .price(new BigDecimal(price))
-                .volume(new BigDecimal(volume))
+                .currency(currency)
+                .price(new BigDecimal(node.get("trade_price").asText()))
+                .volume(new BigDecimal(node.get("acc_trade_volume_24h").asText()))
                 .timestamp(Instant.now())
-                .highPrice(new BigDecimal(highPrice))
-                .lowPrice(new BigDecimal(lowPrice))
-                .openPrice(new BigDecimal(openPrice))
-                .changeRate(new BigDecimal(changeRate))
+                .highPrice(new BigDecimal(node.get("high_price").asText()))
+                .lowPrice(new BigDecimal(node.get("low_price").asText()))
+                .openPrice(new BigDecimal(node.get("opening_price").asText()))
+                .changeRate(new BigDecimal(node.get("signed_change_rate").asText()))
                 .build();
         } catch (Exception e) {
-            log.debug("Skipping Upbit message: {}", message);  // error -> debug로 변경
+            log.debug("Skipping Upbit message: {}", message);
             return null;
         }
     }
