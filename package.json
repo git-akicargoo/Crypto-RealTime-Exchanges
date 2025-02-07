@@ -1,0 +1,25 @@
+{
+  "name": "boot-redis-kafka-mysql",
+  "version": "1.0.0",
+  "scripts": {
+    "start:docker": "docker-compose up -d",
+    "stop:docker": "docker-compose down",
+    "start:backend": "cd backend && ./gradlew bootRun",
+    "start:frontend": "cd frontend && yarn dev",
+    "install:frontend": "cd frontend && yarn install",
+    "kill:ports": "yarn kill-port 5173 8080 || true",
+    "predev": "yarn install && yarn install:frontend",
+    "dev": "yarn kill:ports && concurrently \"yarn start:backend\" \"yarn start:frontend\"",
+    "debug": "yarn kill:ports && concurrently \"cd backend && ./gradlew bootRun --debug-jvm\" \"yarn start:frontend\""
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2",
+    "kill-port": "^2.0.1"
+  },
+  "dependencies": {
+    "@types/react-router-dom": "^5.3.3",
+    "axios": "^1.7.9",
+    "react-router-dom": "^7.1.5"
+  },
+  "license": "MIT"
+}
