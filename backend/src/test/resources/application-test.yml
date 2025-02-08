@@ -1,14 +1,14 @@
-spring:
-  application:
-    name: crypto-exchange-monitor-test
+# spring:
+#   application:
+#     name: crypto-exchange-monitor-test
 
-exchange:
-  enabled: true
-  log:
-    enabled: true
-  binance:
-    websocket-url: wss://stream.binance.com:9443/ws
+# exchange:
+#   enabled: true
+#   log:
+#     enabled: true
+#   binance:
+#     websocket-url: wss://stream.binance.com:9443/ws
 
-logging:
-  level:
-    com.example.boot_redis_kafka_mysql: DEBUG 
+# logging:
+#   level:
+#     com.example.boot_redis_kafka_mysql: DEBUG 

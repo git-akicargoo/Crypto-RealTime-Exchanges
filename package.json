@@ -13,13 +13,19 @@
     "debug": "yarn kill:ports && concurrently \"cd backend && ./gradlew bootRun --debug-jvm\" \"yarn start:frontend\""
   },
   "devDependencies": {
+    "@types/node": "^22.13.1",
+    "@types/sockjs-client": "^1.5.4",
     "concurrently": "^8.2.2",
     "kill-port": "^2.0.1"
   },
   "dependencies": {
+    "@stomp/stompjs": "^7.0.0",
     "@types/react-router-dom": "^5.3.3",
+    "@types/styled-components": "^5.1.34",
     "axios": "^1.7.9",
-    "react-router-dom": "^7.1.5"
+    "react-router-dom": "^7.1.5",
+    "sockjs-client": "^1.6.1",
+    "styled-components": "^6.1.15"
   },
   "license": "MIT"
 }

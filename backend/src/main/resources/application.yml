@@ -1,24 +1,37 @@
 spring:
-  application:
-    name: crypto-exchange-monitor
+  profiles:
+    active: local  # 기본 프로파일은 local
+  websocket:
+    max-text-message-size: 8192
+    max-binary-message-size: 512KB
+
+server:
+  port: 8080
+  tomcat:
+    max-connections: 10000
+    max-threads: 200
+
+---
+# 로컬 개발 환경
+spring:
+  config:
+    activate:
+      on-profile: local
+  datasource:
+    url: jdbc:h2:mem:localdb
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
   jpa:
     hibernate:
       ddl-auto: create
     show-sql: true
-  datasource:
-    url: jdbc:h2:mem:testdb
-    driver-class-name: org.h2.Driver
-    username: sa
-    password:
 
-logging:
-  level:
-    root: INFO
-    com.example.boot_redis_kafka_mysql: INFO
-    com.example.boot_redis_kafka_mysql.exchange.observer: INFO
-    com.example.boot_redis_kafka_mysql.exchange.handler: INFO
-    com.example.boot_redis_kafka_mysql.exchange.handler.exchange.BinanceWebSocketHandler: WARN
-    com.example.boot_redis_kafka_mysql.exchange: DEBUG
+websocket:
+  allowed-origins: "http://localhost:5173"  # 설정값이 있지만 사용되지 않음
+  heartbeat:
+    incoming: 25000
+    outgoing: 25000
 
 exchange:
   enabled: true
@@ -27,3 +40,25 @@ exchange:
   target-symbols:
     - BTC
     - DOGE
+    
+logging:
+  level:
+    root: INFO
+    org.springframework.web: DEBUG
+    org.springframework.web.socket: TRACE
+    org.springframework.messaging: TRACE
+    com.example.boot_redis_kafka_mysql: DEBUG
+
+---
+# 테스트 환경
+spring:
+  config:
+    activate:
+      on-profile: test
+
+logging:
+  level:
+    org.springframework.web.socket: DEBUG
+    com.example.boot_redis_kafka_mysql: DEBUG
+
+
