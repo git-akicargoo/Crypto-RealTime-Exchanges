@@ -66,6 +66,16 @@ public class WebSocketManager {
         return session.send(Mono.just(session.textMessage(message)));
     }
 
+    public Mono<Void> sendBinaryMessage(ExchangeConfig.Exchange exchange, String message) {
+        WebSocketSession session = sessions.get(exchange);
+        if (session == null) {
+            return Mono.error(new IllegalStateException(exchange + " WebSocket session not found"));
+        }
+        return session.send(Mono.just(session.binaryMessage(
+            factory -> factory.wrap(message.getBytes())
+        )));
+    }
+
     // public void connectAll() {
     //     log.info("모든 거래소 웹소켓 연결 시작");
     //     Arrays.stream(ExchangeConfig.Exchange.values())

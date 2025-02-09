@@ -51,9 +51,10 @@ public class UpbitWebSocketHandlerImpl implements WebSocketHandler, UpbitWebSock
             .build();
             
         String message = subscribeVO.createSubscribeMessage();
-        return webSocketManager.sendMessage(Exchange.UPBIT, message)
-            .doOnSuccess(v -> log.info("Upbit 구독 성공: symbols={}, currencies={}", symbols, currencies))
-            .doOnError(e -> log.error("Upbit 구독 실패", e));
+        return webSocketManager.sendBinaryMessage(Exchange.UPBIT, message)
+            .doOnSuccess(v -> log.info("Upbit 구독 성공: symbols={}, currencies={}, message={}", 
+                symbols, currencies, message))
+            .doOnError(e -> log.error("Upbit 구독 실패: {}", e.getMessage()));
     }
 
     @Override
